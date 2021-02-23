@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:slide_digital_clock/slide_digital_clock.dart';
+import 'package:attenv02/slide_digital_clock.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -17,8 +17,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var locationMessege= "";
-  bool timeinbtn = true;
-  bool timeoutbtn = false;
+  var Timein="Test Time in";
+  var Timeout="Test Time Out";
+  // bool timeinbtn = true;
+  // bool timeoutbtn = false;
   String name = "";
 
   void initState() {
@@ -50,8 +52,6 @@ class _HomePageState extends State<HomePage> {
     var position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     var lastPosition=await Geolocator.getLastKnownPosition();
     String now =await new DateFormat.yMd().add_Hm().format(new DateTime.now());
-    timeinbtn=!timeinbtn;
-    timeoutbtn=!timeoutbtn;
     print(lastPosition);
     print(now);
 
@@ -78,6 +78,54 @@ class _HomePageState extends State<HomePage> {
         )
     );
   }
+
+  Container  timeText(){
+    return Container(
+        child:Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("$Timein",style:TextStyle(
+                color: Colors.greenAccent,
+                fontSize: 15.0)
+            ),
+            SizedBox(
+              width:20,
+            ),
+            Text("$Timeout",style:TextStyle(
+                color: Colors.redAccent,
+                fontSize: 15.0))
+          ],
+        )
+    );
+  }
+
+  Container  button(){
+    return Container(
+        child:Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FlatButton(onPressed:(){
+              getCurrentLocation();
+            },
+                color: Colors.orange,
+                child: Text("Time in",
+                  style: TextStyle(
+                    color: Colors.white,fontSize:20
+                  ),)),
+            FlatButton(onPressed:(){
+              getCurrentLocation();
+            },
+                color: Colors.orange,
+                child: Text("Time out",
+                  style: TextStyle(
+                    color: Colors.white,fontSize:20
+                  ),)),
+          ],
+        )
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,54 +153,29 @@ class _HomePageState extends State<HomePage> {
       body: Container(
         decoration: BoxDecoration(
             image: DecorationImage(
-                image: AssetImage("assets/bg.jpg"), fit: BoxFit.cover)),
-        child: Center(
-          child: Container(
-            padding: EdgeInsets.all(30),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+                image: AssetImage("assets/bg.jpg"), fit: BoxFit.fill)),
+          child: Column(
               children: [
-
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children:<Widget>  [
+                    SizedBox(height:60),
                     Container(
-                        child: clock(),
-                    ),
-
-                    Text("Position:$locationMessege",style:TextStyle(
-                        color: Colors.black,
-                        fontSize: 10.0,
-                        fontWeight: FontWeight.bold)),
-                    Visibility(
-                      visible:timeinbtn,
-                      child: FlatButton(onPressed:(){
-                        getCurrentLocation();
-                      },
-                          color: Colors.orange,
-                          child: Text("Time in",
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),)),
-                    ),
-                    Visibility(
-                      visible: timeoutbtn,
-                      child: FlatButton(onPressed:(){
-                        getCurrentLocation();
-                      },
-                          color: Colors.orange,
-                          child: Text("Time out",
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),)),
-                    )
+                      decoration:BoxDecoration(
+                        color: Colors.orangeAccent
+                      ),
+                        child: Padding(padding:EdgeInsets.only(top:20,bottom:20),child: clock())),
+                    Container(
+                        decoration:BoxDecoration(
+                            color: Colors.white
+                        ),
+                        child: Padding(padding:EdgeInsets.only(top:20,bottom:20),child: timeText())),
+                    SizedBox(height:60),
+                    button()
                   ],
                 ),
               ],
             ),
-          ),
-
-        ),
       ),
     );
   }
