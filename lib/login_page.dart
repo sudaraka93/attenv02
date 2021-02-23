@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:attenv02/home_page.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -12,19 +13,31 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   SharedPreferences sharedPreferences;
-  String name = " ";
   bool rememberMe = false;
   Size deviceSize;
-
+  var error =" ";
+// ********************INPUT COLLECTION CONTROLER*********************
   final TextEditingController userController = new TextEditingController();
   final TextEditingController passwordController = new TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // checkLoginStatus();
+    checkLoginStatus();
+  }
+// ********************CHECK LOGIN STATUS*************************
+  checkLoginStatus() async {
+    var sharedPreferences = await SharedPreferences.getInstance();
+    if(sharedPreferences.getString("sid") == null) {
+      print("Not Logged in");
+    }else{
+      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => HomePage()), (Route<dynamic> route) => false);
+      print(sharedPreferences.getString("sid"));
+      print("Logged in");
+    }
   }
 
+// ********************REMBER ME CONDITION*************
   void _onRememberMeChanged(bool newValue) => setState(() {
     rememberMe = newValue;
 
@@ -35,6 +48,10 @@ class _LoginPageState extends State<LoginPage> {
     }
   });
 
+
+
+
+  // **************** SIGN IN FUNCTION ***************
   signIn(String user, pass) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     Map data = {
@@ -59,19 +76,56 @@ class _LoginPageState extends State<LoginPage> {
         });
         print (jsonResponse['data']['sid']);
         sharedPreferences.setString("sid", jsonResponse['data']['sid']);
-        // getUserInfo();
-        // Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => HomePage()), (Route<dynamic> route) => false);
+        getUserInfo();
+        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => HomePage()), (Route<dynamic> route) => false);
       }
+      // else{
+      //   var failed="Username Password Incorrect";
+      //   setState(() {
+      //     error="$failed";
+      //   });
+      // }
     }
     else {
-      setState(() {
-
-      });
       print(response.body);
       return json.decode(response.body);
     }
   }
 
+
+// ****************************GET USER INFO***********************************
+  getUserInfo()async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var jsonResponse = null;
+    var sid= sharedPreferences.getString("sid");
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'sid':'$sid',
+    };
+
+    var response = await http.get("http://solajapan.xyz/api/user/logged-info",
+      headers:headers,
+    );
+    if(response.statusCode == 200) {
+      jsonResponse = json.decode(response.body);
+      if(jsonResponse['err']==0){
+        sharedPreferences.setString("useFullName", jsonResponse['data']['fullname']);
+        sharedPreferences.setInt("useid", jsonResponse['data']['id']);
+        sharedPreferences.setInt("useRoleid", jsonResponse['data']['role_id']);
+
+        print(sharedPreferences.getString("useFullName"));
+        print(sharedPreferences.getInt("useid"));
+        print(sharedPreferences.getInt("useRoleid"));
+
+      }
+    }else{
+      print("did not retireve the user info");
+    }
+  }
+
+
+  // ***********MAIN UI BUILDER*******************
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -104,17 +158,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // Widget background() {
-  //   return Container(
-  //       height: double.infinity,
-  //       width: double.infinity,
-  //       decoration: BoxDecoration(
-  //           image: DecorationImage(
-  //             image: AssetImage('assets/bg.jpg'),
-  //             fit: BoxFit.cover,
-  //           )));
-  // }
-
+  // ********************UI ELEMENT LOGO***********************:
     Container logoCircle(){
       deviceSize = MediaQuery.of(context).size;
         return Container(
@@ -122,27 +166,37 @@ class _LoginPageState extends State<LoginPage> {
               decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      spreadRadius: 10,
+                      color: Colors.black.withOpacity(0.1),
+                      spreadRadius: 5,
                       blurRadius: 5,
                       offset: Offset(0, 7), // changes position of shadow
                     ),
                   ],
                 color: Color.fromRGBO(238, 238, 238, 1),
                 shape: BoxShape.circle,
-                image: DecorationImage(
-                    image: AssetImage("assets/logo.png"),
-                )
-                )
+
+                ),
+            child: Opacity(
+              opacity:0.7,
+                  child:Container(
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage("assets/logo.png"),
+                        )
+                    ),
+                  ),
+        ),
               );
     }
+
+    // *****************UI COMPONET TEXTFILED BOXES*****************
       Container logofield(){
         return Container(
           height: deviceSize.height*0.40,
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withOpacity(0.1),
                 spreadRadius: 10,
                 blurRadius: 5,
                 offset: Offset(0, 7), // changes position of shadow
@@ -166,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                     borderRadius: BorderRadius.all(Radius.circular(20)),
-                    color: Colors.orange,
+                    color: Color.fromRGBO(255, 191, 68, 1),
                     ),
                   child:Padding(padding:EdgeInsets.only(left:10,right:10),
                     child:TextFormField (
@@ -196,7 +250,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                     borderRadius: BorderRadius.all(Radius.circular(20)),
-                    color: Colors.orange,
+                    color:Color.fromRGBO(255, 191, 68, 1),
+                    // color:Color.fromRGBO(228, 146, 25, 1),
                   ),
                   child:Padding(padding:EdgeInsets.only(left:10,right:10),
                     child: TextField(controller: passwordController,
@@ -246,6 +301,5 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       }
-
 
 }

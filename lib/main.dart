@@ -1,4 +1,5 @@
 import 'package:attenv02/login_page.dart';
+import 'package:attenv02/home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,7 @@ class _MainPageState extends State<HomeView> {
   @override
   Widget build(BuildContext context){
     return Scaffold(
-      body:LoginPage(),
+      body:(LoginPage()),
     );
   }
 }

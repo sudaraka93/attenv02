@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
-
 import 'package:attenv02/login_page.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
 import 'package:slide_digital_clock/slide_digital_clock.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,12 +16,18 @@ class HomePage extends StatefulWidget {
 
 
 class _HomePageState extends State<HomePage> {
+  var locationMessege= "";
   bool timeinbtn = true;
   bool timeoutbtn = false;
   String name = "";
 
   void initState() {
     super.initState();
+  }
+  @override
+  void dispose() {
+    print("disposed");
+    super.dispose();
   }
 
   Future <String> loadPref()async{
@@ -37,22 +43,40 @@ class _HomePageState extends State<HomePage> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.clear();
     sharedPreferences.commit();
-    // Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
+    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
   }
-
-
-  var locationMessege= "";
 
   void getCurrentLocation()async{
     var position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     var lastPosition=await Geolocator.getLastKnownPosition();
+    String now =await new DateFormat.yMd().add_Hm().format(new DateTime.now());
     timeinbtn=!timeinbtn;
     timeoutbtn=!timeoutbtn;
     print(lastPosition);
+    print(now);
 
     setState(() {
-      locationMessege="$position.latitude,$position.longitude";
+      locationMessege="$position.latitude,$position.longitude,$now";
     });
+  }
+
+  Container  clock(){
+    return Container(
+        child: DigitalClock(
+          digitAnimationStyle: Curves.elasticOut,
+          is24HourTimeFormat: false,
+          areaDecoration: BoxDecoration(
+            color: Colors.transparent,
+          ),
+          hourMinuteDigitTextStyle: TextStyle(
+            color: Colors.blueGrey,
+            fontSize: 50,
+          ),
+          amPmDigitTextStyle: TextStyle(
+              color: Colors.blueGrey,
+              fontWeight: FontWeight.bold),
+        )
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -93,21 +117,12 @@ class _HomePageState extends State<HomePage> {
                 Column(
                   children:<Widget>  [
                     Container(
-                        child:DigitalClock(
-                          digitAnimationStyle: Curves.elasticOut,
-                          is24HourTimeFormat: false,
-                          areaDecoration: BoxDecoration(
-                            color: Colors.transparent,
-                          ),
-                          hourMinuteDigitTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 50,
-                          ),
-                        )
+                        child: clock(),
                     ),
+
                     Text("Position:$locationMessege",style:TextStyle(
                         color: Colors.black,
-                        fontSize: 2.0,
+                        fontSize: 10.0,
                         fontWeight: FontWeight.bold)),
                     Visibility(
                       visible:timeinbtn,
