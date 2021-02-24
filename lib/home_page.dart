@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:flutter/widgets.dart';
 import 'package:attenv02/login_page.dart';
 import 'package:flutter/services.dart';
@@ -57,6 +58,7 @@ class _HomePageState extends State<HomePage> {
               child: Text('Aproved'),
               onPressed: () {
                 timeInPush();
+                sendtimein();
                 print('Confirmed');
                 Navigator.of(context).pop();
               },
@@ -83,16 +85,17 @@ class _HomePageState extends State<HomePage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Aproved'),
+              child: Text('Cancel'),
               onPressed: () {
-                timeOutPush();
-                print('Confirmed');
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Aproved'),
               onPressed: () {
+                timeOutPush();
+                sendtimeout();
+                print('Confirmed');
                 Navigator.of(context).pop();
               },
             ),
@@ -137,6 +140,73 @@ class _HomePageState extends State<HomePage> {
       Timein="$now";
     });
   }
+
+  sendtimein()async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    double lat;
+    double lon;
+    var jsonResponse = null;
+    var sid= sharedPreferences.getString("sid");
+
+    var position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    lat = position.longitude;
+    lon = position.latitude;
+
+    var coord = "$lon,$lat";
+    Map data = {
+      'coord': '$coord',
+    };
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'sid':'$sid',
+    };
+    var response = await http.post("http://solajapan.xyz/api/attendance/checkin",body:jsonEncode(data),headers:headers
+    );
+    if(response.statusCode == 200) {
+      jsonResponse = json.decode(response.body);
+      if(jsonResponse['err']==0){
+        var date = DateTime.fromMicrosecondsSinceEpoch(jsonResponse['data']['time_in'] * 1000);
+        print(date);
+      }
+    }else{
+      print("did not retireve the user info");
+    }
+  }
+
+  sendtimeout()async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    double lat;
+    double lon;
+    var jsonResponse = null;
+    var sid= sharedPreferences.getString("sid");
+
+    var position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    lat = position.longitude;
+    lon = position.latitude;
+
+    var coord = "$lon,$lat";
+    Map data = {
+      'coord': '$coord',
+    };
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'sid':'$sid',
+    };
+    var response = await http.post("http://solajapan.xyz/api/attendance/checkout",body:jsonEncode(data),headers:headers
+    );
+    if(response.statusCode == 200) {
+      jsonResponse = json.decode(response.body);
+      if(jsonResponse['err']==0){
+        var date = DateTime.fromMicrosecondsSinceEpoch(jsonResponse['data']['time_out'] * 1000);
+        print(date);
+      }
+    }else{
+      print("did not retireve the user info");
+    }
+  }
+
 
   void timeOutPush()async{
     String now =await new DateFormat.yMd().add_Hm().format(new DateTime.now());

@@ -98,12 +98,10 @@ class _LoginPageState extends State<LoginPage> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var jsonResponse = null;
     var sid= sharedPreferences.getString("sid");
-
     Map<String, String> headers = {
       'Content-Type': 'application/json; charset=UTF-8',
       'sid':'$sid',
     };
-
     var response = await http.get("http://solajapan.xyz/api/user/logged-info",
       headers:headers,
     );
@@ -117,7 +115,6 @@ class _LoginPageState extends State<LoginPage> {
         print(sharedPreferences.getString("useFullName"));
         print(sharedPreferences.getInt("useid"));
         print(sharedPreferences.getInt("useRoleid"));
-
       }
     }else{
       print("did not retireve the user info");
