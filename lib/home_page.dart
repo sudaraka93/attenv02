@@ -32,6 +32,77 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  Future<void> _showTimeinAproval() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Time In Confirmation'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                // Text('Aprove The Time In '),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Aproved'),
+              onPressed: () {
+                timeInPush();
+                print('Confirmed');
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showTimeOutAproval() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Time Out Confirmation'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                // Text('Aprove The Time In '),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Aproved'),
+              onPressed: () {
+                timeOutPush();
+                print('Confirmed');
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   Future <String> loadPref()async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     return Future.delayed(Duration(seconds: 1),()async{
@@ -57,6 +128,20 @@ class _HomePageState extends State<HomePage> {
 
     setState(() {
       locationMessege="$position.latitude,$position.longitude,$now";
+    });
+  }
+
+  void timeInPush()async{
+    String now =await new DateFormat.yMd().add_Hm().format(new DateTime.now());
+    setState(() {
+      Timein="$now";
+    });
+  }
+
+  void timeOutPush()async{
+    String now =await new DateFormat.yMd().add_Hm().format(new DateTime.now());
+    setState(() {
+      Timeout="$now";
     });
   }
 
@@ -105,7 +190,7 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             FlatButton(onPressed:(){
-              getCurrentLocation();
+              _showTimeinAproval();
             },
                 color: Colors.orange,
                 child: Text("Time in",
@@ -113,7 +198,7 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.white,fontSize:20
                   ),)),
             FlatButton(onPressed:(){
-              getCurrentLocation();
+              _showTimeOutAproval();
             },
                 color: Colors.orange,
                 child: Text("Time out",
