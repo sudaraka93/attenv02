@@ -247,7 +247,7 @@ class _HomePageState extends State<HomePage> {
                     SizedBox(height:60),
                     Container(
                       decoration:BoxDecoration(
-                        color: Colors.orangeAccent
+                        color: Color.fromRGBO(255, 191, 68, 1),
                       ),
                         child: Padding(padding:EdgeInsets.only(top:20,bottom:20),child: clock())),
                     Container(
