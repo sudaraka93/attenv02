@@ -20,8 +20,8 @@ class _HomePageState extends State<HomePage> {
   var locationMessege= "";
   var Timein="Test Time in";
   var Timeout="Test Time Out";
-  // bool timeinbtn = true;
-  // bool timeoutbtn = false;
+  bool timeinbtn = true;
+  bool timeoutbtn = false;
   String name = "";
 
   void initState() {
@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
               child: Text('Aproved'),
               onPressed: () {
                 timeInPush();
-                sendtimein();
+                // sendtimein();
                 print('Confirmed');
                 Navigator.of(context).pop();
               },
@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage> {
               child: Text('Aproved'),
               onPressed: () {
                 timeOutPush();
-                sendtimeout();
+                // sendtimeout();
                 print('Confirmed');
                 Navigator.of(context).pop();
               },
@@ -107,6 +107,13 @@ class _HomePageState extends State<HomePage> {
 
 
   Future <String> loadPref()async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    return Future.delayed(Duration(seconds: 1),()async{
+      return await sharedPreferences.getString("useFullName");
+    });
+
+  }
+  Future <String> timechecker()async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     return Future.delayed(Duration(seconds: 1),()async{
       return await sharedPreferences.getString("useFullName");
@@ -135,10 +142,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   void timeInPush()async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String now =await new DateFormat.yMd().add_Hm().format(new DateTime.now());
-    setState(() {
-      Timein="$now";
-    });
+    String day =await new DateFormat.d().add_Hm().format(new DateTime.now());
+    sharedPreferences.setString("timein", now);
+    sharedPreferences.setString("date", day);
+    sharedPreferences.commit();
   }
 
   sendtimein()async{
@@ -209,10 +218,10 @@ class _HomePageState extends State<HomePage> {
 
 
   void timeOutPush()async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String now =await new DateFormat.yMd().add_Hm().format(new DateTime.now());
-    setState(() {
-      Timeout="$now";
-    });
+    sharedPreferences.setString("timeout", now);
+    sharedPreferences.commit();
   }
 
   Container  clock(){
@@ -256,28 +265,33 @@ class _HomePageState extends State<HomePage> {
 
   Container  button(){
     return Container(
-        child:Row(
+        child:Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FlatButton(onPressed:(){
-              _showTimeinAproval();
-            },
-                color: Colors.orange,
-                child: Text("Time in",
-                  style: TextStyle(
-                    color: Colors.white,fontSize:20
-                  ),)),
-            FlatButton(onPressed:(){
-              _showTimeOutAproval();
-            },
-                color: Colors.orange,
-                child: Text("Time out",
-                  style: TextStyle(
-                    color: Colors.white,fontSize:20
-                  ),)),
+            Visibility(
+              visible:timeinbtn ,
+              child: FlatButton(onPressed:(){
+                _showTimeinAproval();
+              },
+                  color: Colors.orange,
+                  child: Text("Time in",
+                    style: TextStyle(
+                      color: Colors.white,fontSize:20
+                    ),)),
+            ),
+            Visibility(
+              visible:timeoutbtn,
+              child: FlatButton(onPressed:(){
+                _showTimeOutAproval();
+              },
+                  color: Colors.orange,
+                  child: Text("Time out",
+                    style: TextStyle(
+                      color: Colors.white,fontSize:20
+                    ),)),
+            ),
           ],
-        )
-    );
+    ));
   }
 
 
